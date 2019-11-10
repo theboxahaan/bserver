@@ -76,7 +76,7 @@ def login():
             #generate new token
             auth_token = secrets.token_hex(32)
             update_query = "UPDATE LDAP SET CURRENT_TOKEN = ? WHERE EMAIL = ? "
-            dbcon.query_db(update_query, [auth_token, username], one=True)
+            dbcon.query_db(update_query, ["0", username], one=True)
             return auth_token     
 
 
