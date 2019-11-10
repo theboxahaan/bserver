@@ -6,6 +6,7 @@ import dbcon
 from werkzeug.datastructures import MultiDict
 import os, sys
 import secrets
+from login import login_required
 
 app = Flask(__name__)
 
@@ -61,6 +62,7 @@ def get_qr():
 #start server if called directly ---> debug mode is on for now
 
 @app.route('/api/login', methods = ['POST'])
+@login_required
 def login():
     if request.method == 'POST':
         pprint(request.json)
@@ -68,6 +70,8 @@ def login():
         password = request.json['password']
         # connector = dbcon.get_db()
         records= dbcon.query_db("select * from LDAP where EMAIL = ? AND PWD_HASH = ? AND CURRENT_TOKEN = '0' ",  [username, password] , one=True)
+        print("++++++++++++++++")
+        print(records)
         if records is None :
             print("Error Code is - Can be Anything MoFo\n")
             return "MOFO"
