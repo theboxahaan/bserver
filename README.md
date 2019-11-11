@@ -2,24 +2,31 @@
 
 ## Get QR Query
 ```
-curl -d '{"vendorid":"1234", "amount":"100", "tokenid":"11222"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/get_qr > response
+curl -d '{"vendorid":"1234", "amount":"100", "tokenid":"11222"}'\
+ -H "Content-Type: application/json"\
+ -X POST http://localhost:5000/api/get_qr > response
 ```
 
 ## Login Query
 
 ```
-curl -d '{"username" : "ahaand@iitbhilai.ac.in" , "password":"5bb03619cfece3e85fe9b5a500a2f4743ed3e09fd0440abbe07baf21e4f8c57d"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/login
+curl -d '{"username" : "ahaand@iitbhilai.ac.in" ,\
+ "password":"5bb03619cfece3e85fe9b5a500a2f4743ed3e09fd0440abbe07baf21e4f8c57d"}'\
+ -H "Content-Type: application/json" -X POST http://localhost:5000/api/login
 ```
 
 ## Check Balance Query
 
 ```
-curl -d '{"auth_token":"cc3cf681404ee89b67e85982864e5ae15cae086ddb933eff2b77d9ed0813890b"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/check_balance
+curl -d '{"auth_token":"cc3cf681404ee89b67e85982864e5ae15cae086ddb933eff2b77d9ed0813890b"}'\
+ -H "Content-Type: application/json" -X POST http://localhost:5000/api/check_balance
 ```
 
 ## P2P Query
 ```
-curl -d '{"auth_token":"cc3cf681404ee89b67e85982864e5ae15cae086ddb933eff2b77d9ed0813890b", "payee":"harshvardhanp@iitbhilai.ac.in", "amount":"2"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/p2p
+curl -d '{"auth_token":"cc3cf681404ee89b67e85982864e5ae15cae086ddb933eff2b77d9ed0813890b",\
+ "payee":"harshvardhanp@iitbhilai.ac.in", "amount":"2"}' -H "Content-Type: application/json"\
+ -X POST http://localhost:5000/api/p2p
 ```
 
 --------
