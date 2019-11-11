@@ -11,9 +11,10 @@ foo:bar theboxahaan$ curl -d '{"vendorid":"1234", "amount":"100", "tokenid":"112
 
 ```console
 foo:bar theboxahaan$ curl -d '{"username" : "ahaand@iitbhilai.ac.in" ,\
- "password":"5bb03619cfece3e85fe9b5a500a2f4743ed3e09fd0440abbe07baf21e4f8c57d"}'\
+ "password":"1c54facba35fa70dbccf9def1e2f113470328983b8f06b6b71cfdd305afc7935"}'\
  -H "Content-Type: application/json" -X POST http://localhost:5000/api/login
 ```
+
 
 ## Check Balance Query
 
