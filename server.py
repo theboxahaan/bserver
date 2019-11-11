@@ -62,29 +62,84 @@ def get_qr():
 #start server if called directly ---> debug mode is on for now
 
 @app.route('/api/login', methods = ['POST'])
-@login_required
 def login():
     if request.method == 'POST':
         pprint(request.json)
         username = request.json['username']
         password = request.json['password']
-        # connector = dbcon.get_db()
-        records= dbcon.query_db("select * from LDAP where EMAIL = ? AND PWD_HASH = ? AND CURRENT_TOKEN = '0' ",  [username, password] , one=True)
-        print("++++++++++++++++")
-        print(records)
-        if records is None :
-            print("Error Code is - Can be Anything MoFo\n")
-            return "MOFO"
-        else: 
-            print("Current Token is: " + records["current_token"] + '\n')
-            #generate new token
-            auth_token = secrets.token_hex(32)
-            update_query = "UPDATE LDAP SET CURRENT_TOKEN = ? WHERE EMAIL = ? "
-            dbcon.query_db(update_query, ["0", username], one=True)
-            return auth_token     
 
+        records= dbcon.query_db("select * from LDAP where EMAIL = ? AND PWD_HASH = ?",  [username, password] , one=True)
+
+        if records is None :
+            print("+++++++++++ INVALID CREDENTIALS +++++++++++\n")
+            return "+++++++++++ INVALID CREDENTIALS +++++++++++"
+
+        else:
+
+            #if IS_ACTIVE = 1 then auth token is already set, hence return that auth token
+            if records["is_active"] == 1:
+                return records["current_token"]
+            else:
+
+                print("Generating New Token For User")
+
+                #generate new token
+                auth_token = secrets.token_hex(32)
+                update_query = "UPDATE LDAP SET CURRENT_TOKEN = ?, IS_ACTIVE = 1  WHERE EMAIL = ? "
+            
+                dbcon.query_db(update_query, [auth_token, username], one=True)
+                return auth_token
+    else:
+        return "+++++++++++ INVALID REQUEST METHOD ++++++++++++++"
+
+
+
+@app.route('/api/check_balance', methods = ['POST'])
+@login_required
+def check_balance():
+    pprint(request.json)
+    auth_token = request.json['auth_token']
+    query = "select * from LDAP where CURRENT_TOKEN = ?"
+    records = dbcon.query_db(query, [auth_token], one=True)
+    print("Current Balance: {}".format(records["balance"]))
+    return str(records["balance"])
+
+
+
+@app.route('/api/p2p', methods=['POST'])
+@login_required
+def p2p():
+    pprint(request.json)
+    auth_token = request.json["auth_token"]
+    query = 'select * from LDAP where CURRENT_TOKEN = ?'
+    payer_records = dbcon.query_db(query, [auth_token], one=True)
+    payer = payer_records["email"]
+    payee = request.json["payee"]
+    tx_amount = int(request.json["amount"])
+
+    #check validity of payee
+    payee_records = dbcon.query_db("select * from LDAP where EMAIL = ?", [payee], one=True)
+    if payee_records is None:
+        print("+++++++++++ PAYEE DOES NOT EXIST +++++++++++\n")
+        return "+++++++++++ PAYEE DOES NOT EXIST +++++++++++"
+    
+    #checking if payer has enough balance
+
+    if payer_records["balance"] >= tx_amount :
+        #update payee and payer records
+        dbcon.query_db("update LDAP set BALANCE = ? where EMAIL = ? ", [payee_records["balance"] + tx_amount, payee], one=True)
+        dbcon.query_db("update LDAP set BALANCE = ? where EMAIL = ?", [payer_records["balance"] - tx_amount, payer], one=True)
+            
+        print("SUCCESS\n")
+        return "TX SUCCESS"
+
+    else:
+        print("+++++++++++ BALANCE UNDERFLOW +++++++++++\n")
+        return "+++++++++++ BALANCE UNDERFLOW +++++++++++"
 
         
+
+
 
 
 @app.teardown_appcontext

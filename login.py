@@ -9,19 +9,18 @@ import dbcon
 def login_required(func):
     def wrapper():
         if request.method == 'POST':
+            print("Decorator Check\n")
             pprint(request.json)
-            username = request.json['username']
-            password = request.json['password']
             auth_token = request.json['auth_token']
 
-            records = dbcon.query_db("select * from LDAP where EMAIL = ? AND PWD_HASH = ? AND CURRENT_TOKEN = ? AND IS_ACTIVE = 1", [username, password, auth_token], one=True)
-            #print(records)
-            #print("==================")
+            records = dbcon.query_db("select * from LDAP where CURRENT_TOKEN = ? AND IS_ACTIVE = 1", [auth_token], one=True)
+            
             if records is None:
-                return "Invalid Record" 
+                return "+++++++++++ AUTH FAiLURE +++++++++++" 
             else:
-                func()
                 return func()
+    #renaming name of wrapper to function name
+    wrapper.__name__ = func.__name__
     return wrapper
 
 
