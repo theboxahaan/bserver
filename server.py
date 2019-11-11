@@ -72,7 +72,7 @@ def login():
 
         if records is None :
             print("+++++++++++ INVALID CREDENTIALS +++++++++++\n")
-            return "+++++++++++ INVALID CREDENTIALS +++++++++++"
+            return "INVALID_CREDENTIALS" 
 
         else:
 
@@ -90,7 +90,7 @@ def login():
                 dbcon.query_db(update_query, [auth_token, username], one=True)
                 return auth_token
     else:
-        return "+++++++++++ INVALID REQUEST METHOD ++++++++++++++"
+        return "INVALID_REQUEST_METHOD"
 
 
 
@@ -121,7 +121,7 @@ def p2p():
     payee_records = dbcon.query_db("select * from LDAP where EMAIL = ?", [payee], one=True)
     if payee_records is None:
         print("+++++++++++ PAYEE DOES NOT EXIST +++++++++++\n")
-        return "+++++++++++ PAYEE DOES NOT EXIST +++++++++++"
+        return "PAYEE_DOES_NOT_EXIST"
     
     #checking if payer has enough balance
 
@@ -131,11 +131,11 @@ def p2p():
         dbcon.query_db("update LDAP set BALANCE = ? where EMAIL = ?", [payer_records["balance"] - tx_amount, payer], one=True)
             
         print("SUCCESS\n")
-        return "TX SUCCESS"
+        return "TX_SUCCESS"
 
     else:
         print("+++++++++++ BALANCE UNDERFLOW +++++++++++\n")
-        return "+++++++++++ BALANCE UNDERFLOW +++++++++++"
+        return "BALANCE_UNDERFLOW" 
 
         
 
