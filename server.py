@@ -46,18 +46,51 @@ def user(name):
 
 
 @app.route('/api/get_qr', methods = ['POST'])
+@login_required
 def get_qr():
-    if request.method == 'POST':
-        #receive the json object containing values for generating the qr code
-        #json keys are - {vendorid, amount, tokenid(for auth)<ignore for now>}
-        pprint(request.json)
-        vendorid = request.json['vendorid']
-        amount = request.json['amount']
-        tokenid = request.json['tokenid']
-        url = qr.gen_qr("VID"+vendorid+"AMNT"+amount+"TID"+tokenid)
-        url.svg('test.svg', scale = 1 )
+    #receive the json object containing values for generating the qr code
+    #json keys are - {vendorid, amount, tokenid(for auth)<ignore for now>}
+    '''pprint(request.json)
+    vendorid = request.json['vendorid']
+    amount = request.json['amount']
+    tokenid = request.json['tokenid']
+    url = qr.gen_qr("VID"+vendorid+"AMNT"+amount+"TID"+tokenid)
+    url.svg('test.svg', scale = 1 )
+    print(url.terminal())
+    return qr.qrencode64(url)'''
+    pprint(request.json)
+    auth_token = request.json["auth_token"]
+    query = 'select * from LDAP where CURRENT_TOKEN = ?'
+    payer_records = dbcon.query_db(query, [auth_token], one=True)
+    payer = payer_records["email"]
+    payee = request.json["payee"]
+    tx_amount = int(request.json["amount"])
+
+    #check validity of payee
+    payee_records = dbcon.query_db("select * from LDAP where EMAIL = ?", [payee], one=True)
+    if payee_records is None:
+        print("+++++++++++ PAYEE DOES NOT EXIST +++++++++++\n")
+        return "PAYEE_DOES_NOT_EXIST"
+    
+    #checking if payer has enough balance
+
+    if payer_records["balance"] >= tx_amount :
+        #update payee and payer records
+        dbcon.query_db("update LDAP set BALANCE = ? where EMAIL = ? ", [payee_records["balance"] + tx_amount, payee], one=True)
+        dbcon.query_db("update LDAP set BALANCE = ? where EMAIL = ?", [payer_records["balance"] - tx_amount, payer], one=True)
+        
+        print("CREATING QR CODE\n")
+        qr_string = "VID" + payee + "," + "AMOUNT" + request.json["amount"]
+        url = qr.gen_qr(qr_string)
+        url.svg('test.svg', scale=1)
         print(url.terminal())
-        return qr.qrencode64(url)
+        print("SUCCESS\n")
+        #return "Yes"
+        return jsonify({"STATUS":"TX_SUCCESS", "QR":str(qr.qrencode64(url))})
+
+    else:
+        print("+++++++++++ BALANCE UNDERFLOW +++++++++++\n")
+        return "BALANCE_UNDERFLOW" 
 
 #start server if called directly ---> debug mode is on for now
 

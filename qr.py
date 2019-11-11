@@ -9,7 +9,7 @@ def gen_qr(l):
 def qrencode64(url):
     buffer = io.BytesIO()
     #url.svg(buffer)
-    url.png(buffer)
+    url.svg(buffer)
     b64 = base64.b64encode(buffer.getvalue())
     return b64
     
