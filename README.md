@@ -25,7 +25,7 @@ foo:bar theboxahaan$ curl -d '{"auth_token":"cc3cf681404ee89b67e85982864e5ae15ca
 
 --------
 
-## LDAP.db Schema
+## User.db Schema
 ```
 sqlite> .schema ldap
 CREATE TABLE LDAP(
